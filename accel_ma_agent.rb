@@ -17,8 +17,7 @@ Accel MAを使うエージェントです。
       Property.new('max_bars',  '最大バー数', 20),
       Property.new('k', 'K', 0.5),
       Property.new('period', 'MA期間', 24),
-      Property.new('smoothing',  'スムージング', 10),
-      Property.new('gannbars',  'Gann期間', 11)
+      Property.new('smoothing',  'スムージング', 10)
     ]
   end
 
