@@ -5,35 +5,35 @@ class AccelMaAgent
   include Jiji::Model::Agents::Agent
     def self.description
     <<-STR
-Accel MA‚ðŽg‚¤ƒG[ƒWƒFƒ“ƒg‚Å‚·B
+Accel MAã‚’ä½¿ã†ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã§ã™ã€‚
       STR
   end
 
-  # UI‚©‚çÝ’è‰Â”\‚ÈƒvƒƒpƒeƒB‚Ìˆê——
+  # UIã‹ã‚‰è¨­å®šå¯èƒ½ãªãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã®ä¸€è¦§
   def self.property_infos
     [
-      Property.new('symbol',  'ƒVƒ“ƒ{ƒ‹', 'USDJPY'),
-      Property.new('tf',  'ƒ^ƒCƒ€ƒtƒŒ[ƒ€', 60),
-      Property.new('max_bars',  'Å‘åƒo[”', 20),
+      Property.new('symbol',  'ã‚·ãƒ³ãƒœãƒ«', 'USDJPY'),
+      Property.new('tf',  'ã‚¿ã‚¤ãƒ ãƒ•ãƒ¬ãƒ¼ãƒ ', 60),
+      Property.new('max_bars',  'æœ€å¤§ãƒãƒ¼æ•°', 20),
       Property.new('k', 'K', 0.5),
-      Property.new('period', 'MAŠúŠÔ', 24),
-      Property.new('smoothing',  'ƒXƒ€[ƒWƒ“ƒO', 10),
-      Property.new('gannbars',  'GannŠúŠÔ', 11)
+      Property.new('period', 'MAæœŸé–“', 24),
+      Property.new('smoothing',  'ã‚¹ãƒ ãƒ¼ã‚¸ãƒ³ã‚°', 10),
+      Property.new('gannbars',  'GannæœŸé–“', 11)
     ]
   end
 
   def post_create
-    # ˆÚ“®•½‹Ï‚ÌŽZoƒNƒ‰ƒX
-    # ‹¤—Lƒ‰ƒCƒuƒ‰ƒŠ‚ÌƒNƒ‰ƒX‚ð—˜—pB
+    # ç§»å‹•å¹³å‡ã®ç®—å‡ºã‚¯ãƒ©ã‚¹
+    # å…±æœ‰ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã®ã‚¯ãƒ©ã‚¹ã‚’åˆ©ç”¨ã€‚
     @accelma    = AccelMA.new(@k.to_f,@period.to_i,@smoothing.to_i)
     @candles    = Candles.new(@tf.to_i, @max_bars.to_i * @tf.to_i)
 
-    # ˆÚ“®•½‹ÏƒOƒ‰ƒt
+    # ç§»å‹•å¹³å‡ã‚°ãƒ©ãƒ•
     @graph1 = graph_factory.create('Accel MA',:rate, :average, ['#779999'])
     
   end
 
-  # ŽŸ‚ÌƒŒ[ƒg‚ðŽó‚¯Žæ‚é
+  # æ¬¡ã®ãƒ¬ãƒ¼ãƒˆã‚’å—ã‘å–ã‚‹
   def next_tick(tick)
     tick_value=tick[@symbol.to_sym]
     
@@ -47,9 +47,9 @@ Accel MA‚ðŽg‚¤ƒG[ƒWƒFƒ“ƒg‚Å‚·B
         if @accelma.next_data(h,l,o) != nil
              logger.debug "1 %s : %s (%s  %s)" % [tick.timestamp,o,@accelma.main[-1],@accelma.sig[-1]]
             
-            # ƒOƒ‰ƒt‚Éo—Í
+            # ã‚°ãƒ©ãƒ•ã«å‡ºåŠ›
             @graph1 << [@accelma.main[-1]]
-            # ƒS[ƒ‹ƒfƒ“ƒNƒƒX/ƒfƒbƒhƒNƒƒX‚ð”»’è
+            # ã‚´ãƒ¼ãƒ«ãƒ‡ãƒ³ã‚¯ãƒ­ã‚¹/ãƒ‡ãƒƒãƒ‰ã‚¯ãƒ­ã‚¹ã‚’åˆ¤å®š
             do_trade
         end
     end
@@ -58,17 +58,17 @@ Accel MA‚ðŽg‚¤ƒG[ƒWƒFƒ“ƒg‚Å‚·B
 
   def do_trade
     if  @accelma.sig[-1]==1
-      # ”„‚èŒš‹Ê‚ª‚ ‚ê‚Î‘S‚ÄŒˆÏ
+      # å£²ã‚Šå»ºçŽ‰ãŒã‚ã‚Œã°å…¨ã¦æ±ºæ¸ˆ
       close_exist_positions(:sell)
       if !exist_positions(:buy)
-        # V‹K‚É”ƒ‚¢
+        # æ–°è¦ã«è²·ã„
         broker.buy(@symbol.to_sym, 1)
       end
     elsif @accelma.sig[-1]== -1
-      # ”ƒ‚¢Œš‹Ê‚ª‚ ‚ê‚Î‘S‚ÄŒˆÏ
+      # è²·ã„å»ºçŽ‰ãŒã‚ã‚Œã°å…¨ã¦æ±ºæ¸ˆ
       close_exist_positions(:buy)
       if !exist_positions(:sell)
-        # V‹K‚É”„‚è
+        # æ–°è¦ã«å£²ã‚Š
         broker.sell(@symbol.to_sym, 1)
       end
     end
@@ -88,12 +88,12 @@ Accel MA‚ðŽg‚¤ƒG[ƒWƒFƒ“ƒg‚Å‚·B
   end
 
 
-  # ƒG[ƒWƒFƒ“ƒg‚Ìó‘Ô‚ð•Ô‹p
+  # ã‚¨ãƒ¼ã‚¸ã‚§ãƒ³ãƒˆã®çŠ¶æ…‹ã‚’è¿”å´
   def state
     {accelma: @accelma.state, candles: @candles.state}
   end
 
-  # ‰i‘±‰»‚³‚ê‚½ó‘Ô‚©‚çŒ³‚Ìó‘Ô‚ð•œŒ³‚·‚é
+  # æ°¸ç¶šåŒ–ã•ã‚ŒãŸçŠ¶æ…‹ã‹ã‚‰å…ƒã®çŠ¶æ…‹ã‚’å¾©å…ƒã™ã‚‹
   def restore_state(state)
     return unless state[:candles]
     @accelma.restore_state(state[:accelma])
@@ -212,8 +212,8 @@ class AccelMA
     attr_reader :sig
     
     include Math
-    # ƒRƒ“ƒXƒgƒ‰ƒNƒ^
-    # range:: WŒvŠúŠÔ
+    # ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+    # range:: é›†è¨ˆæœŸé–“
     def initialize(k=0.5,period=20,smoothing=10)
         @threshold=0.03
         @alpha = 0.99
@@ -295,9 +295,9 @@ class AccelMA
         @coef3= state[:coef3]
     end
 
-    # ŽŸ‚Ìƒf[ƒ^‚ðŽó‚¯Žæ‚Á‚ÄŽw•W‚ð•Ô‚µ‚Ü‚·B
-    # data:: ŽŸ‚Ìƒf[ƒ^
-    # –ß‚è’l:: Žw•WB\•ª‚Èƒf[ƒ^‚ª’~Ï‚³‚ê‚Ä‚¢‚È‚¢ê‡nil
+    # æ¬¡ã®ãƒ‡ãƒ¼ã‚¿ã‚’å—ã‘å–ã£ã¦æŒ‡æ¨™ã‚’è¿”ã—ã¾ã™ã€‚
+    # data:: æ¬¡ã®ãƒ‡ãƒ¼ã‚¿
+    # æˆ»ã‚Šå€¤:: æŒ‡æ¨™ã€‚ååˆ†ãªãƒ‡ãƒ¼ã‚¿ãŒè“„ç©ã•ã‚Œã¦ã„ãªã„å ´åˆnil
     def next_data(hi,lo,op)
         @index+=1
 
